@@ -1,5 +1,32 @@
 # Changelog
 
+## [2.0.3] - 2026-09-28
+
+### 🎨 Trình chỉnh sửa & chú thích hình ảnh (Image Annotation Editor)
+- **Bộ công cụ chú thích toàn diện**:
+  - Hỗ trợ công cụ vẽ tự do (**Pen**), đánh số thứ tự trực quan (**Number**), thêm văn bản tùy chỉnh (**Text**), và làm mờ các vùng thông tin nhạy cảm (**Blur**).
+  - Tích hợp vẽ hình khối hình học chuẩn xác (**Shapes**): Hình chữ nhật (**Rectangle**), Hình elip (**Ellipse**) và Mũi tên chỉ dẫn (**Arrow**).
+  - Bảng chọn màu sắc trực quan với mã HEX và thanh trượt tinh chỉnh kích thước nét vẽ (**Stroke Width**) linh hoạt.
+  - Hỗ trợ chế độ chọn/di chuyển chú thích (**Select**), xoay ảnh 90°, phóng to/thu nhỏ (**Zoom In/Out**), hoàn tác (**Undo**) và làm lại (**Redo**).
+  - Cho phép xóa từng đối tượng chú thích hoặc lưu đè trực tiếp kết quả chỉnh sửa vào tệp ảnh clipboard ban đầu.
+
+### 🛠️ Khắc phục sự cố giao diện & Tràn luồng Render (UI & Layout Assertion Fixes)
+- **Thanh công cụ trình chỉnh sửa ảnh (Toolbar Layout)**:
+  - Thay thế `ListView` nằm ngang bằng `SingleChildScrollView` kết hợp `Row` cho toàn bộ thanh công cụ, giải quyết triệt để lỗi `_RenderLayoutBuilder was mutated in _RenderLayoutBuilder.performLayout` và `_elements.contains(element)` do `Tooltip` (`OverlayPortal`) kích hoạt trong chu kỳ tính toán layout sliver.
+  - Chuẩn hóa phân cấp `Tooltip` bao bọc bên ngoài `CupertinoButton`.
+- **Tối ưu hóa Overlay gỡ lỗi AI (`AiDebugOverlay`)**:
+  - Đưa cây widget chính (`widget.child`) ra ngoài `LayoutBuilder` và tối ưu bỏ qua hoàn toàn khi chế độ debug tắt, giải phóng cây điều hướng toàn ứng dụng khỏi ràng buộc layout callback gốc.
+- **Trải nghiệm Quick Panel**:
+  - Tự động làm sạch ô tìm kiếm cục bộ khi mở lại Quick Panel để giữ trải nghiệm tìm kiếm nhanh chóng và nhất quán.
+- **macOS Build Target**:
+  - Nâng `MACOSX_DEPLOYMENT_TARGET` lên `12.0` cho `Podfile` và Xcode Project nhằm tương thích mượt mà với các thư viện CocoaPods mới nhất.
+
+### 🌐 Hoàn thiện bản địa hóa đa ngôn ngữ (Localization)
+- Bổ sung đầy đủ 19 chuỗi bản dịch đa ngôn ngữ cho toàn bộ bộ công cụ chú thích ảnh trên cả 6 ngôn ngữ (**Tiếng Việt**, **English**, **Deutsch**, **日本語**, **한국어**, **简体中文**).
+
+### 📦 Đồng bộ phiên bản
+- Nâng phiên bản toàn dự án lên **2.0.3** (build **23**) đồng bộ trên `pubspec.yaml`, `ClipFlowVersion` và Windows `Runner.rc`.
+
 ## [2.0.2] - 2026-08-26
 
 ### 🛠️ Khắc phục sự cố giao diện & Tràn viền (RenderFlex Overflow)
