@@ -135,6 +135,63 @@ class AppLocalizationsZh extends AppLocalizations {
   String get clipboard_update_failed => '无法更新此剪贴板';
 
   @override
+  String get image_editor_add_text => '添加文本';
+
+  @override
+  String get image_editor_enter_text => '输入文本';
+
+  @override
+  String get image_editor_add => '添加';
+
+  @override
+  String get image_editor_annotation_color => '标注颜色';
+
+  @override
+  String get image_editor_select => '选择';
+
+  @override
+  String get image_editor_choose_shape => '选择形状';
+
+  @override
+  String get image_editor_rectangle => '矩形';
+
+  @override
+  String get image_editor_ellipse => '椭圆';
+
+  @override
+  String get image_editor_arrow => '箭头';
+
+  @override
+  String get image_editor_move => '移动和缩放';
+
+  @override
+  String get image_editor_pen => '画笔';
+
+  @override
+  String get image_editor_number => '编号';
+
+  @override
+  String get image_editor_blur => '模糊区域';
+
+  @override
+  String get image_editor_shapes => '形状';
+
+  @override
+  String get image_editor_choose_color => '选择颜色';
+
+  @override
+  String get image_editor_zoom_out => '缩小';
+
+  @override
+  String get image_editor_zoom_in => '放大';
+
+  @override
+  String get image_editor_undo => '撤销';
+
+  @override
+  String get image_editor_redo => '重做';
+
+  @override
   String get invalid_color_code => '输入有效的颜色代码';
 
   @override

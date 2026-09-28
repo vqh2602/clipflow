@@ -136,6 +136,63 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zwischenablage konnte nicht aktualisiert werden';
 
   @override
+  String get image_editor_add_text => 'Text hinzufügen';
+
+  @override
+  String get image_editor_enter_text => 'Text eingeben';
+
+  @override
+  String get image_editor_add => 'Hinzufügen';
+
+  @override
+  String get image_editor_annotation_color => 'Anmerkungsfarbe';
+
+  @override
+  String get image_editor_select => 'Auswählen';
+
+  @override
+  String get image_editor_choose_shape => 'Form auswählen';
+
+  @override
+  String get image_editor_rectangle => 'Rechteck';
+
+  @override
+  String get image_editor_ellipse => 'Ellipse';
+
+  @override
+  String get image_editor_arrow => 'Pfeil';
+
+  @override
+  String get image_editor_move => 'Verschieben und zoomen';
+
+  @override
+  String get image_editor_pen => 'Stift';
+
+  @override
+  String get image_editor_number => 'Nummer';
+
+  @override
+  String get image_editor_blur => 'Bereich verwischen';
+
+  @override
+  String get image_editor_shapes => 'Formen';
+
+  @override
+  String get image_editor_choose_color => 'Farbe auswählen';
+
+  @override
+  String get image_editor_zoom_out => 'Verkleinern';
+
+  @override
+  String get image_editor_zoom_in => 'Vergrößern';
+
+  @override
+  String get image_editor_undo => 'Rückgängig';
+
+  @override
+  String get image_editor_redo => 'Wiederholen';
+
+  @override
   String get invalid_color_code => 'Gültigen Farbcode eingeben';
 
   @override

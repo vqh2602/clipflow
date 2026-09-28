@@ -358,6 +358,120 @@ abstract class AppLocalizations {
   /// **'Unable to update this clipboard'**
   String get clipboard_update_failed;
 
+  /// No description provided for @image_editor_add_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Add text'**
+  String get image_editor_add_text;
+
+  /// No description provided for @image_editor_enter_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter text'**
+  String get image_editor_enter_text;
+
+  /// No description provided for @image_editor_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get image_editor_add;
+
+  /// No description provided for @image_editor_annotation_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Annotation color'**
+  String get image_editor_annotation_color;
+
+  /// No description provided for @image_editor_select.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get image_editor_select;
+
+  /// No description provided for @image_editor_choose_shape.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose shape'**
+  String get image_editor_choose_shape;
+
+  /// No description provided for @image_editor_rectangle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rectangle'**
+  String get image_editor_rectangle;
+
+  /// No description provided for @image_editor_ellipse.
+  ///
+  /// In en, this message translates to:
+  /// **'Ellipse'**
+  String get image_editor_ellipse;
+
+  /// No description provided for @image_editor_arrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrow'**
+  String get image_editor_arrow;
+
+  /// No description provided for @image_editor_move.
+  ///
+  /// In en, this message translates to:
+  /// **'Move and zoom'**
+  String get image_editor_move;
+
+  /// No description provided for @image_editor_pen.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen'**
+  String get image_editor_pen;
+
+  /// No description provided for @image_editor_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get image_editor_number;
+
+  /// No description provided for @image_editor_blur.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur area'**
+  String get image_editor_blur;
+
+  /// No description provided for @image_editor_shapes.
+  ///
+  /// In en, this message translates to:
+  /// **'Shapes'**
+  String get image_editor_shapes;
+
+  /// No description provided for @image_editor_choose_color.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose color'**
+  String get image_editor_choose_color;
+
+  /// No description provided for @image_editor_zoom_out.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get image_editor_zoom_out;
+
+  /// No description provided for @image_editor_zoom_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get image_editor_zoom_in;
+
+  /// No description provided for @image_editor_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get image_editor_undo;
+
+  /// No description provided for @image_editor_redo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get image_editor_redo;
+
   /// No description provided for @invalid_color_code.
   ///
   /// In en, this message translates to:

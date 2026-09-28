@@ -135,6 +135,63 @@ class AppLocalizationsVi extends AppLocalizations {
   String get clipboard_update_failed => 'Không thể cập nhật clipboard này';
 
   @override
+  String get image_editor_add_text => 'Thêm văn bản';
+
+  @override
+  String get image_editor_enter_text => 'Nhập nội dung';
+
+  @override
+  String get image_editor_add => 'Thêm';
+
+  @override
+  String get image_editor_annotation_color => 'Màu chú thích';
+
+  @override
+  String get image_editor_select => 'Chọn';
+
+  @override
+  String get image_editor_choose_shape => 'Chọn hình học';
+
+  @override
+  String get image_editor_rectangle => 'Hình chữ nhật';
+
+  @override
+  String get image_editor_ellipse => 'Hình elip';
+
+  @override
+  String get image_editor_arrow => 'Mũi tên';
+
+  @override
+  String get image_editor_move => 'Di chuyển và thu phóng';
+
+  @override
+  String get image_editor_pen => 'Bút vẽ';
+
+  @override
+  String get image_editor_number => 'Đánh số';
+
+  @override
+  String get image_editor_blur => 'Làm mờ vùng';
+
+  @override
+  String get image_editor_shapes => 'Hình học';
+
+  @override
+  String get image_editor_choose_color => 'Chọn màu';
+
+  @override
+  String get image_editor_zoom_out => 'Thu nhỏ';
+
+  @override
+  String get image_editor_zoom_in => 'Phóng to';
+
+  @override
+  String get image_editor_undo => 'Hoàn tác';
+
+  @override
+  String get image_editor_redo => 'Làm lại';
+
+  @override
   String get invalid_color_code => 'Hãy nhập mã màu hợp lệ';
 
   @override

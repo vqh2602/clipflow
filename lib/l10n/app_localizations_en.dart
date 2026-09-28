@@ -135,6 +135,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clipboard_update_failed => 'Unable to update this clipboard';
 
   @override
+  String get image_editor_add_text => 'Add text';
+
+  @override
+  String get image_editor_enter_text => 'Enter text';
+
+  @override
+  String get image_editor_add => 'Add';
+
+  @override
+  String get image_editor_annotation_color => 'Annotation color';
+
+  @override
+  String get image_editor_select => 'Select';
+
+  @override
+  String get image_editor_choose_shape => 'Choose shape';
+
+  @override
+  String get image_editor_rectangle => 'Rectangle';
+
+  @override
+  String get image_editor_ellipse => 'Ellipse';
+
+  @override
+  String get image_editor_arrow => 'Arrow';
+
+  @override
+  String get image_editor_move => 'Move and zoom';
+
+  @override
+  String get image_editor_pen => 'Pen';
+
+  @override
+  String get image_editor_number => 'Number';
+
+  @override
+  String get image_editor_blur => 'Blur area';
+
+  @override
+  String get image_editor_shapes => 'Shapes';
+
+  @override
+  String get image_editor_choose_color => 'Choose color';
+
+  @override
+  String get image_editor_zoom_out => 'Zoom out';
+
+  @override
+  String get image_editor_zoom_in => 'Zoom in';
+
+  @override
+  String get image_editor_undo => 'Undo';
+
+  @override
+  String get image_editor_redo => 'Redo';
+
+  @override
   String get invalid_color_code => 'Enter a valid color code';
 
   @override

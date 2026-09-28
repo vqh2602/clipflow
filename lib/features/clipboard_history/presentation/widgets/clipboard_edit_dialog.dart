@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 
 import '../../../../app/providers.dart';
+import '../../../../core/ui/image_annotation_editor.dart';
 import '../../../../core/ui/cupertino_components.dart';
 import '../../../../core/utils/color_parser.dart';
 import '../../domain/clipboard_content_type.dart';
@@ -56,6 +57,7 @@ class _ClipboardEditDialogState extends ConsumerState<_ClipboardEditDialog> {
   late final TextEditingController _controller;
   Uint8List? _imageBytes;
   img.Image? _decodedImage;
+  final GlobalKey<ImageAnnotationEditorState> _imageEditorKey = GlobalKey();
   int _quarterTurns = 0;
   bool _saving = false;
   bool _imageLoadFailed = false;
@@ -104,10 +106,18 @@ class _ClipboardEditDialogState extends ConsumerState<_ClipboardEditDialog> {
       Uint8List? editedImageBytes;
       if (_isImage) {
         final source = _decodedImage!;
-        final edited = _quarterTurns == 0
-            ? source
-            : img.copyRotate(source, angle: _quarterTurns * 90);
-        editedImageBytes = Uint8List.fromList(img.encodePng(edited));
+        final editor = _imageEditorKey.currentState;
+        if (editor?.hasAnnotations == true) {
+          editedImageBytes = await editor!.exportPng();
+          if (editedImageBytes == null) {
+            throw StateError('Could not render the edited image.');
+          }
+        } else {
+          final edited = _quarterTurns == 0
+              ? source
+              : img.copyRotate(source, angle: _quarterTurns * 90);
+          editedImageBytes = Uint8List.fromList(img.encodePng(edited));
+        }
       }
       final updated = await ref
           .read(historyControllerProvider.notifier)
@@ -146,7 +156,7 @@ class _ClipboardEditDialogState extends ConsumerState<_ClipboardEditDialog> {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720, maxHeight: 560),
+          constraints: const BoxConstraints(maxWidth: 920, maxHeight: 680),
           child: CupertinoPopupSurface(
             isSurfacePainted: true,
             child: Container(
@@ -236,14 +246,14 @@ class _ClipboardEditDialogState extends ConsumerState<_ClipboardEditDialog> {
             color: resolveColor(context, ClipFlowColors.border),
           ),
         ),
-        child: _imageBytes == null
+        child: _imageBytes == null || _decodedImage == null
             ? const Center(child: CupertinoActivityIndicator())
-            : Padding(
-                padding: const EdgeInsets.all(10),
-                child: RotatedBox(
-                  quarterTurns: _quarterTurns,
-                  child: Image.memory(_imageBytes!, fit: BoxFit.contain),
-                ),
+            : ImageAnnotationEditor(
+                key: _imageEditorKey,
+                imageBytes: _imageBytes!,
+                pixelWidth: _decodedImage!.width,
+                pixelHeight: _decodedImage!.height,
+                quarterTurns: _quarterTurns,
               ),
       );
     }

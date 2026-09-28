@@ -135,6 +135,63 @@ class AppLocalizationsJa extends AppLocalizations {
   String get clipboard_update_failed => 'このクリップボードを更新できません';
 
   @override
+  String get image_editor_add_text => 'テキストを追加';
+
+  @override
+  String get image_editor_enter_text => 'テキストを入力';
+
+  @override
+  String get image_editor_add => '追加';
+
+  @override
+  String get image_editor_annotation_color => '注釈の色';
+
+  @override
+  String get image_editor_select => '選択';
+
+  @override
+  String get image_editor_choose_shape => '図形を選択';
+
+  @override
+  String get image_editor_rectangle => '長方形';
+
+  @override
+  String get image_editor_ellipse => '楕円';
+
+  @override
+  String get image_editor_arrow => '矢印';
+
+  @override
+  String get image_editor_move => '移動とズーム';
+
+  @override
+  String get image_editor_pen => 'ペン';
+
+  @override
+  String get image_editor_number => '番号';
+
+  @override
+  String get image_editor_blur => '範囲をぼかす';
+
+  @override
+  String get image_editor_shapes => '図形';
+
+  @override
+  String get image_editor_choose_color => '色を選択';
+
+  @override
+  String get image_editor_zoom_out => '縮小';
+
+  @override
+  String get image_editor_zoom_in => '拡大';
+
+  @override
+  String get image_editor_undo => '元に戻す';
+
+  @override
+  String get image_editor_redo => 'やり直す';
+
+  @override
   String get invalid_color_code => '有効なカラーコードを入力してください';
 
   @override

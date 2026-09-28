@@ -19,6 +19,7 @@ class QuickClipboardCardWidget extends ConsumerWidget {
   const QuickClipboardCardWidget({
     super.key,
     required this.item,
+    required this.query,
     required this.number,
     required this.selected,
     required this.onTap,
@@ -27,6 +28,7 @@ class QuickClipboardCardWidget extends ConsumerWidget {
   });
 
   final ClipboardItem item;
+  final String query;
   final int number;
   final bool selected;
   final VoidCallback onTap;
@@ -36,7 +38,6 @@ class QuickClipboardCardWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final color = _typeColor(item.contentType);
-    final query = ref.watch(historyControllerProvider).query;
     final parsedColor = item.contentType == ClipboardContentType.color
         ? ColorParser.parse(item.content)
         : null;

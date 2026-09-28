@@ -43,6 +43,7 @@ class _QuickPanelScreenState extends ConsumerState<QuickPanelScreen>
   late final Animation<Offset> _panelPosition;
   bool _entranceStarted = false;
   int _selectedIndex = 0;
+  String _query = '';
 
   @override
   void initState() {
@@ -114,12 +115,13 @@ class _QuickPanelScreenState extends ConsumerState<QuickPanelScreen>
 
   Future<void> _pasteItem(ClipboardItem item) async {
     final desktop = ref.read(desktopIntegrationProvider);
-    // The quick panel is recreated whenever it is opened. Clear the provider
-    // query as well as this controller so a previous search cannot leave a
-    // filtered list behind under an empty search field on the next opening.
     _searchController.clear();
-    ref.read(historyControllerProvider.notifier).search('');
-    if (mounted) setState(() => _selectedIndex = 0);
+    if (mounted) {
+      setState(() {
+        _query = '';
+        _selectedIndex = 0;
+      });
+    }
     ref.read(quickPanelModeProvider.notifier).state = false;
     final hideBeforeCopy = item.contentType == ClipboardContentType.file;
     // Resolving a file on disk and preparing its native clipboard formats can
@@ -138,8 +140,12 @@ class _QuickPanelScreenState extends ConsumerState<QuickPanelScreen>
   Future<void> _pasteItemAsPlainText(ClipboardItem item) async {
     final desktop = ref.read(desktopIntegrationProvider);
     _searchController.clear();
-    ref.read(historyControllerProvider.notifier).search('');
-    if (mounted) setState(() => _selectedIndex = 0);
+    if (mounted) {
+      setState(() {
+        _query = '';
+        _selectedIndex = 0;
+      });
+    }
     final copied = await ref
         .read(historyControllerProvider.notifier)
         .copyAsPlainText(item);
@@ -347,15 +353,26 @@ class _QuickPanelScreenState extends ConsumerState<QuickPanelScreen>
     }
   }
 
+  void _search(String value) {
+    setState(() {
+      _query = value;
+      _selectedIndex = 0;
+    });
+    if (_itemScrollController.hasClients) {
+      _itemScrollController.jumpTo(0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(historyControllerProvider);
+    final panelState = state.copyWith(query: _query);
     final settings = ref.watch(settingsControllerProvider);
     final collections =
         (ref.watch(collectionsControllerProvider).value ?? const [])
             .where((collection) => !collection.isVault || settings.vaultEnabled)
             .toList(growable: false);
-    final visibleItems = state.visibleItems;
+    final visibleItems = panelState.visibleItems;
     final totalItems = visibleItems.length;
 
     if (_selectedIndex >= totalItems && totalItems > 0) {
@@ -409,20 +426,19 @@ class _QuickPanelScreenState extends ConsumerState<QuickPanelScreen>
                   child: Column(
                     children: [
                       QuickToolbarWidget(
-                        state: state,
+                        state: panelState,
                         collections: collections,
                         monitoringEnabled: settings.monitoringEnabled,
                         searchController: _searchController,
                         searchFocusNode: _searchFocusNode,
+                        onSearchChanged: _search,
                         onOpenMainWindow: _openMainWindow,
                         onChooseType: _chooseType,
                       ),
                       const CupertinoDivider(),
                       Expanded(
                         child: totalItems == 0
-                            ? QuickEmptyStateWidget(
-                                hasQuery: state.query.isNotEmpty,
-                              )
+                            ? QuickEmptyStateWidget(hasQuery: _query.isNotEmpty)
                             : ListView.builder(
                                 controller: _itemScrollController,
                                 scrollDirection: Axis.horizontal,
@@ -441,6 +457,7 @@ class _QuickPanelScreenState extends ConsumerState<QuickPanelScreen>
                                       padding: const EdgeInsets.only(right: 12),
                                       child: QuickClipboardCardWidget(
                                         item: item,
+                                        query: _query,
                                         number: index + 1,
                                         selected: isSelected,
                                         onTap: () {

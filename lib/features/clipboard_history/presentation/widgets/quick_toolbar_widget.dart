@@ -19,6 +19,7 @@ class QuickToolbarWidget extends ConsumerWidget {
     required this.monitoringEnabled,
     required this.searchController,
     required this.searchFocusNode,
+    required this.onSearchChanged,
     required this.onOpenMainWindow,
     required this.onChooseType,
   });
@@ -28,6 +29,7 @@ class QuickToolbarWidget extends ConsumerWidget {
   final bool monitoringEnabled;
   final TextEditingController searchController;
   final FocusNode searchFocusNode;
+  final ValueChanged<String> onSearchChanged;
   final VoidCallback onOpenMainWindow;
   final ValueChanged<BuildContext> onChooseType;
 
@@ -186,7 +188,7 @@ class QuickToolbarWidget extends ConsumerWidget {
               controller: searchController,
               focusNode: searchFocusNode,
               placeholder: context.l10n.search_in_clipboard,
-              onChanged: historyNotifier.search,
+              onChanged: onSearchChanged,
             ),
           ),
           const SizedBox(width: 6),

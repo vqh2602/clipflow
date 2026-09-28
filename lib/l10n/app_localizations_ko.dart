@@ -135,6 +135,63 @@ class AppLocalizationsKo extends AppLocalizations {
   String get clipboard_update_failed => '이 클립보드를 업데이트할 수 없습니다';
 
   @override
+  String get image_editor_add_text => '텍스트 추가';
+
+  @override
+  String get image_editor_enter_text => '텍스트 입력';
+
+  @override
+  String get image_editor_add => '추가';
+
+  @override
+  String get image_editor_annotation_color => '주석 색상';
+
+  @override
+  String get image_editor_select => '선택';
+
+  @override
+  String get image_editor_choose_shape => '도형 선택';
+
+  @override
+  String get image_editor_rectangle => '사각형';
+
+  @override
+  String get image_editor_ellipse => '타원';
+
+  @override
+  String get image_editor_arrow => '화살표';
+
+  @override
+  String get image_editor_move => '이동 및 확대/축소';
+
+  @override
+  String get image_editor_pen => '펜';
+
+  @override
+  String get image_editor_number => '번호';
+
+  @override
+  String get image_editor_blur => '영역 흐리게';
+
+  @override
+  String get image_editor_shapes => '도형';
+
+  @override
+  String get image_editor_choose_color => '색상 선택';
+
+  @override
+  String get image_editor_zoom_out => '축소';
+
+  @override
+  String get image_editor_zoom_in => '확대';
+
+  @override
+  String get image_editor_undo => '실행 취소';
+
+  @override
+  String get image_editor_redo => '다시 실행';
+
+  @override
   String get invalid_color_code => '올바른 색상 코드를 입력하세요';
 
   @override

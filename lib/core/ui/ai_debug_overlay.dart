@@ -26,63 +26,71 @@ class _AiDebugOverlayState extends ConsumerState<AiDebugOverlay> {
   @override
   Widget build(BuildContext context) {
     final debugState = ref.watch(aiDebugControllerProvider);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maximumX = (constraints.maxWidth - _buttonSize).clamp(
-          0.0,
-          double.infinity,
-        );
-        final maximumY = (constraints.maxHeight - _buttonSize).clamp(
-          0.0,
-          double.infinity,
-        );
-        final current = _position ?? Offset(maximumX - 16, 72);
-        final position = Offset(
-          current.dx.clamp(0.0, maximumX),
-          current.dy.clamp(0.0, maximumY),
-        );
+    if (!debugState.isEnabled) {
+      return widget.child;
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        widget.child,
+        if (!_showPanel)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final maximumX = (constraints.maxWidth - _buttonSize).clamp(
+                0.0,
+                double.infinity,
+              );
+              final maximumY = (constraints.maxHeight - _buttonSize).clamp(
+                0.0,
+                double.infinity,
+              );
+              final current = _position ?? Offset(maximumX - 16, 72);
+              final position = Offset(
+                current.dx.clamp(0.0, maximumX),
+                current.dy.clamp(0.0, maximumY),
+              );
 
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            widget.child,
-            if (debugState.isEnabled && !_showPanel)
-              Positioned(
-                left: position.dx,
-                top: position.dy,
-                child: _DebugFloatingButton(
-                  entryCount: debugState.entries.length,
-                  onTap: () => setState(() => _showPanel = true),
-                  onDrag: (delta) {
-                    setState(() {
-                      _position = Offset(
-                        (position.dx + delta.dx).clamp(0.0, maximumX),
-                        (position.dy + delta.dy).clamp(0.0, maximumY),
-                      );
-                    });
-                  },
-                ),
-              ),
-            if (debugState.isEnabled && _showPanel)
-              _DebugLogPanel(
-                entries: debugState.entries,
-                onClose: () => setState(() => _showPanel = false),
-                onClear: () =>
-                    ref.read(aiDebugControllerProvider.notifier).clear(),
-                onCopy: () async {
-                  final text = ref
-                      .read(aiDebugControllerProvider.notifier)
-                      .exportText();
-                  await Clipboard.setData(ClipboardData(text: text));
-                },
-                onDisable: () {
-                  setState(() => _showPanel = false);
-                  ref.read(aiDebugControllerProvider.notifier).disable();
-                },
-              ),
-          ],
-        );
-      },
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    left: position.dx,
+                    top: position.dy,
+                    child: _DebugFloatingButton(
+                      entryCount: debugState.entries.length,
+                      onTap: () => setState(() => _showPanel = true),
+                      onDrag: (delta) {
+                        setState(() {
+                          _position = Offset(
+                            (position.dx + delta.dx).clamp(0.0, maximumX),
+                            (position.dy + delta.dy).clamp(0.0, maximumY),
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        if (_showPanel)
+          _DebugLogPanel(
+            entries: debugState.entries,
+            onClose: () => setState(() => _showPanel = false),
+            onClear: () =>
+                ref.read(aiDebugControllerProvider.notifier).clear(),
+            onCopy: () async {
+              final text = ref
+                  .read(aiDebugControllerProvider.notifier)
+                  .exportText();
+              await Clipboard.setData(ClipboardData(text: text));
+            },
+            onDisable: () {
+              setState(() => _showPanel = false);
+              ref.read(aiDebugControllerProvider.notifier).disable();
+            },
+          ),
+      ],
     );
   }
 }

@@ -13,6 +13,7 @@ import 'package:clipflow/features/clipboard_history/domain/content_classifier.da
 import 'package:clipflow/features/clipboard_history/domain/url_preview_metadata.dart';
 import 'package:clipflow/features/clipboard_history/presentation/home_screen.dart';
 import 'package:clipflow/features/clipboard_history/presentation/history_controller.dart';
+import 'package:clipflow/features/clipboard_history/presentation/quick_panel_screen.dart';
 import 'package:clipflow/features/clipboard_history/presentation/widgets/search_syntax_field.dart';
 import 'package:clipflow/features/clipboard_history/presentation/widgets/sidebar_widget.dart';
 import 'package:clipflow/features/clipboard_history/presentation/widgets/clipboard_file_preview.dart';
@@ -455,7 +456,7 @@ void main() {
     );
   });
 
-  testWidgets('quick panel search suggestions fill the shared search field', (
+  testWidgets('quick panel search suggestions fill its search field', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(1400, 390);
@@ -480,6 +481,89 @@ void main() {
     );
     expect(editable.controller.text, 'note:');
     expect(editable.controller, isA<SearchSyntaxTextEditingController>());
+  });
+
+  testWidgets('quick panel clears its local search when reopened', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1400, 390);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    repository.items.add(
+      ClipboardItem(
+        id: 'item-2',
+        content: 'https://example.com',
+        normalizedContent: 'https://example.com',
+        contentHash: 'hash-2',
+        contentType: ClipboardContentType.url,
+        createdAt: DateTime(2026, 7, 27),
+        updatedAt: DateTime(2026, 7, 27),
+        lastCopiedAt: DateTime(2026, 7, 27),
+        isPinned: false,
+        isSensitive: false,
+        copyCount: 1,
+      ),
+    );
+    var showPanel = true;
+    late StateSetter setHostState;
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          clipboardRepositoryProvider.overrideWithValue(repository),
+          clipboardWatcherProvider.overrideWithValue(watcher),
+          urlPreviewServiceProvider.overrideWithValue(
+            const _NoopUrlPreviewService(),
+          ),
+          settingsRepositoryProvider.overrideWithValue(settingsRepository),
+        ],
+        child: CupertinoApp(
+          locale: const Locale('vi'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              setHostState = setState;
+              return showPanel
+                  ? const QuickPanelScreen()
+                  : const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('quick-panel-search')),
+      'flutter.dev',
+    );
+    await tester.pump();
+    expect(find.textContaining('flutter.dev'), findsWidgets);
+    expect(find.textContaining('example.com'), findsNothing);
+    final highlighted = tester.widget<HighlightedText>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is HighlightedText && widget.text.contains('flutter.dev'),
+      ),
+    );
+    expect(highlighted.query, 'flutter.dev');
+
+    setHostState(() => showPanel = false);
+    await tester.pump();
+    setHostState(() => showPanel = true);
+    await tester.pumpAndSettle();
+
+    final editable = tester.widget<EditableText>(
+      find.descendant(
+        of: find.byKey(const Key('quick-panel-search')),
+        matching: find.byType(EditableText),
+      ),
+    );
+    expect(editable.controller.text, isEmpty);
+    expect(find.textContaining('flutter.dev'), findsWidgets);
+    expect(find.textContaining('example.com'), findsWidgets);
   });
 
   testWidgets('pin button persists pinned state', (tester) async {
