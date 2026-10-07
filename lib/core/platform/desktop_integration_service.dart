@@ -25,7 +25,7 @@ class OpenAtLoginResult {
   final String? errorMessage;
 }
 
-enum DesktopWindowMode { main, quickPanel, aiWindow, aiWithQuickPanel, hidden }
+enum DesktopWindowMode { main, quickPanel, aiWindow, aiWithQuickPanel, touchNotch, hidden }
 
 class _MainWindowSnapshot {
   const _MainWindowSnapshot({
@@ -53,6 +53,10 @@ class DesktopIntegrationService with TrayListener {
   VoidCallback? _onQuickPanelDismissed;
   VoidCallback? _onAiWindowRequested;
   VoidCallback? _onCheckUpdatesRequested;
+  VoidCallback? _onTouchNotchRequested;
+  VoidCallback? _onTouchNotchDismissed;
+  VoidCallback? _onTouchNotchCollapseRequested;
+  bool Function()? _shouldProtectSensitiveWindows;
   DesktopWindowMode _windowMode = DesktopWindowMode.main;
   DesktopWindowMode get windowMode => _windowMode;
   _MainWindowSnapshot? _mainWindowSnapshot;
@@ -110,6 +114,10 @@ class DesktopIntegrationService with TrayListener {
     required VoidCallback onQuickPanelDismissed,
     VoidCallback? onAiWindowRequested,
     VoidCallback? onCheckUpdatesRequested,
+    VoidCallback? onTouchNotchRequested,
+    VoidCallback? onTouchNotchDismissed,
+    VoidCallback? onTouchNotchCollapseRequested,
+    bool Function()? shouldProtectSensitiveWindows,
     ValueChanged<bool>? onTrayStatusChanged,
     ValueChanged<bool>? onOpenAtLoginStatusChanged,
   }) async {
@@ -118,6 +126,10 @@ class DesktopIntegrationService with TrayListener {
     _onQuickPanelDismissed = onQuickPanelDismissed;
     _onAiWindowRequested = onAiWindowRequested;
     _onCheckUpdatesRequested = onCheckUpdatesRequested;
+    _onTouchNotchRequested = onTouchNotchRequested;
+    _onTouchNotchDismissed = onTouchNotchDismissed;
+    _onTouchNotchCollapseRequested = onTouchNotchCollapseRequested;
+    _shouldProtectSensitiveWindows = shouldProtectSensitiveWindows;
 
     if (!isDesktop || _initialized) return;
     _initialized = true;
@@ -238,6 +250,10 @@ class DesktopIntegrationService with TrayListener {
               label: _readLocalizations().open_quick_panel,
               onClick: (_) => toggleQuickPanel(),
             ),
+            MenuItem(
+              label: 'Touch Note (Tai thỏ)',
+              onClick: (_) => toggleTouchNotch(),
+            ),
             MenuItem.separator(),
             MenuItem(
               label: _readLocalizations().check_updates,
@@ -338,12 +354,15 @@ class DesktopIntegrationService with TrayListener {
       await _restoreAiWindowAfterQuickPanel();
       return;
     }
-    if (_windowMode == DesktopWindowMode.aiWindow && isActive) {
-      await _showQuickPanelBesideAi();
-      return;
-    }
     if (_windowMode == DesktopWindowMode.quickPanel && isActive) {
       await hideQuickPanel();
+      return;
+    }
+
+    if (await _isSensitiveContextProtected()) return;
+
+    if (_windowMode == DesktopWindowMode.aiWindow && isActive) {
+      await _showQuickPanelBesideAi();
       return;
     }
 
@@ -417,17 +436,37 @@ class DesktopIntegrationService with TrayListener {
     }
   }
 
+  Future<bool> _isSensitiveContextProtected() async {
+    if (!hasWindowPlugin ||
+        !(_shouldProtectSensitiveWindows?.call() ?? false)) {
+      return false;
+    }
+    try {
+      return await _windowChannel.invokeMethod<bool>('isSensitiveContext') ??
+          false;
+    } on Object catch (error) {
+      _logger.log(
+        LogLevel.warning,
+        'Could not inspect the focused input before opening Quick Panel',
+        error: error,
+      );
+      return false;
+    }
+  }
+
   Future<void> showMainWindow() async {
     if (!isDesktop) return;
     final returningFromAlternateWindow =
         _windowMode == DesktopWindowMode.quickPanel ||
         _windowMode == DesktopWindowMode.aiWindow ||
         _windowMode == DesktopWindowMode.aiWithQuickPanel ||
+        _windowMode == DesktopWindowMode.touchNotch ||
         _windowMode == DesktopWindowMode.hidden;
     _windowMode = DesktopWindowMode.main;
     _onMainWindowRequested?.call();
     if (hasWindowPlugin) {
       await _windowChannel.invokeMethod<void>('setQuickPanelMode', false);
+      await _windowChannel.invokeMethod<void>('setTouchNotchMode', false);
     }
     if (Platform.isMacOS) {
       await windowManager.setVisibleOnAllWorkspaces(false);
@@ -601,6 +640,151 @@ class DesktopIntegrationService with TrayListener {
       await windowManager.hide();
     }
     _onQuickPanelDismissed?.call();
+  }
+
+  Future<void> toggleTouchNotch({String style = 'macbook_notch'}) async {
+    if (!isDesktop) return;
+
+    final isVisible = await windowManager.isVisible();
+    final isMinimized = await windowManager.isMinimized();
+    final isActive = isVisible && !isMinimized;
+
+    if (_windowMode == DesktopWindowMode.touchNotch && isActive) {
+      await hideTouchNotch();
+      return;
+    }
+
+    await showTouchNotch(style: style);
+  }
+
+  Future<void> collapseTouchNotch({String style = 'macbook_notch'}) async {
+    if (_windowMode != DesktopWindowMode.touchNotch) return;
+    _onTouchNotchCollapseRequested?.call();
+    await updateTouchNotchBounds(isExpanded: false, style: style);
+  }
+
+  Future<void> updateTouchNotchBounds({
+    required bool isExpanded,
+    required String style,
+  }) async {
+    if (_windowMode != DesktopWindowMode.touchNotch) return;
+    final isDynamicIsland = style == 'dynamic_island';
+    final targetWidth = isExpanded ? 660.0 : (isDynamicIsland ? 220.0 : 260.0);
+    final targetHeight = isExpanded ? 220.0 : (isDynamicIsland ? 44.0 : 36.0);
+
+    if (Platform.isMacOS && hasWindowPlugin) {
+      try {
+        await _windowChannel.invokeMethod<void>('updateNotchBounds', {
+          'width': targetWidth,
+          'height': targetHeight,
+          'isDynamicIsland': isDynamicIsland,
+        });
+        if (isExpanded) {
+          await windowManager.focus();
+        }
+        return;
+      } on Object catch (_) {}
+    }
+
+    final targetTop = isDynamicIsland ? 8.0 : 0.0;
+    final displays = await screenRetriever.getAllDisplays();
+    final primary = await screenRetriever.getPrimaryDisplay();
+    final cursor = await screenRetriever.getCursorScreenPoint();
+    final display = displays.firstWhere((item) {
+      final position = item.visiblePosition ?? Offset.zero;
+      final size = item.visibleSize ?? item.size;
+      return (position & size).contains(cursor);
+    }, orElse: () => primary);
+    final screenWidth = display.size.width;
+    final screenX = display.visiblePosition?.dx ?? 0.0;
+
+    final targetPosition = Offset(
+      screenX + (screenWidth - targetWidth) / 2,
+      targetTop,
+    );
+    final targetSize = Size(targetWidth, targetHeight);
+
+    await windowManager.setSize(targetSize);
+    await windowManager.setPosition(targetPosition);
+    if (isExpanded) {
+      await windowManager.focus();
+    }
+  }
+
+  Future<void> showTouchNotch({String style = 'macbook_notch'}) async {
+    if (_windowMode == DesktopWindowMode.touchNotch &&
+        await windowManager.isVisible()) {
+      return;
+    }
+
+    if (_windowMode == DesktopWindowMode.main &&
+        await windowManager.isVisible()) {
+      _mainWindowSnapshot = _MainWindowSnapshot(
+        position: await windowManager.getPosition(),
+        size: await windowManager.getSize(),
+        wasMaximized: await windowManager.isMaximized(),
+        wasFullScreen: await windowManager.isFullScreen(),
+      );
+      if (_mainWindowSnapshot!.wasFullScreen) {
+        await windowManager.setFullScreen(false);
+      }
+      if (_mainWindowSnapshot!.wasMaximized) {
+        await windowManager.unmaximize();
+      }
+    }
+
+    _windowMode = DesktopWindowMode.touchNotch;
+    _ignoreBlurUntil = DateTime.now().add(const Duration(milliseconds: 450));
+    _onTouchNotchRequested?.call();
+
+    final isDynamicIsland = style == 'dynamic_island';
+    final initialWidth = isDynamicIsland ? 220.0 : 260.0;
+    final initialHeight = isDynamicIsland ? 44.0 : 36.0;
+
+    await windowManager.setMinimumSize(const Size(160, 30));
+    await windowManager.setResizable(false);
+    await windowManager.setAlwaysOnTop(true);
+    await windowManager.setSkipTaskbar(true);
+    if (Platform.isMacOS) {
+      await windowManager.setVisibleOnAllWorkspaces(
+        true,
+        visibleOnFullScreen: true,
+      );
+      await windowManager.setHasShadow(false);
+      await windowManager.setBackgroundColor(const Color(0x00000000));
+    }
+
+    if (Platform.isMacOS && hasWindowPlugin) {
+      await _windowChannel.invokeMethod<void>('setTouchNotchMode', {
+        'enabled': true,
+        'width': initialWidth,
+        'height': initialHeight,
+        'isDynamicIsland': isDynamicIsland,
+      });
+    }
+
+    await windowManager.show();
+    await windowManager.focus();
+
+    if (Platform.isMacOS && hasWindowPlugin) {
+      await _windowChannel.invokeMethod<void>('updateNotchBounds', {
+        'width': initialWidth,
+        'height': initialHeight,
+        'isDynamicIsland': isDynamicIsland,
+      });
+    }
+  }
+
+  Future<void> hideTouchNotch() async {
+    if (_windowMode != DesktopWindowMode.touchNotch) return;
+    _windowMode = DesktopWindowMode.hidden;
+    if (isDesktop) {
+      await windowManager.hide();
+    }
+    if (hasWindowPlugin) {
+      await _windowChannel.invokeMethod<void>('setTouchNotchMode', false);
+    }
+    _onTouchNotchDismissed?.call();
   }
 
   Future<bool> checkAccessibilityPermission() async {
@@ -783,14 +967,25 @@ class DesktopIntegrationService with TrayListener {
   }
 
   Future<void> handleWindowBlur() async {
-    if (_windowMode != DesktopWindowMode.quickPanel) return;
+    if (_windowMode != DesktopWindowMode.quickPanel &&
+        _windowMode != DesktopWindowMode.touchNotch) {
+      return;
+    }
     if (DateTime.now().isBefore(_ignoreBlurUntil)) return;
+    if (_windowMode == DesktopWindowMode.touchNotch) {
+      _onTouchNotchCollapseRequested?.call();
+      return;
+    }
     await hideQuickPanel();
   }
 
   Future<void> handleWindowClose() async {
     if (_windowMode == DesktopWindowMode.quickPanel) {
       await hideQuickPanel();
+      return;
+    }
+    if (_windowMode == DesktopWindowMode.touchNotch) {
+      _onTouchNotchCollapseRequested?.call();
       return;
     }
     if (_windowMode == DesktopWindowMode.main) {

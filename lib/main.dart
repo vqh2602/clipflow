@@ -10,6 +10,8 @@ import 'app/app.dart';
 import 'app/providers.dart';
 import 'core/database/app_database.dart';
 import 'features/settings/data/settings_repository.dart';
+import 'features/touch_notch/data/touch_notch_providers.dart';
+import 'features/touch_notch/data/touch_notch_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,11 +35,13 @@ Future<void> main() async {
   final database = await AppDatabase.open();
   final preferences = await SharedPreferences.getInstance();
   final settingsRepository = SettingsRepository(preferences);
+  final touchNotchService = TouchNotchService(preferences);
   runApp(
     ProviderScope(
       overrides: [
         appDatabaseProvider.overrideWithValue(database),
         settingsRepositoryProvider.overrideWithValue(settingsRepository),
+        touchNotchServiceProvider.overrideWithValue(touchNotchService),
       ],
       child: const ClipFlowApp(),
     ),

@@ -27,6 +27,8 @@ import 'widgets/history_pane_widget.dart';
 import 'widgets/note_edit_dialog.dart';
 import 'widgets/search_syntax_field.dart';
 import '../../vault/presentation/vault_dialogs.dart';
+import '../../touch_notch/data/touch_notch_providers.dart';
+import '../../touch_notch/presentation/touch_notch_overlay.dart';
 import 'widgets/mobile_sidebar_sheet.dart';
 import 'widgets/sidebar_widget.dart';
 
@@ -409,6 +411,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
     if (quickPanelMode) {
       return const QuickPanelScreen();
+    }
+    final touchNotchMode = ref.watch(touchNotchModeProvider);
+    if (touchNotchMode) {
+      final desktop = ref.read(desktopIntegrationProvider);
+      return TouchNotchOverlay(
+        onClose: () {
+          ref.read(touchNotchExpandedProvider.notifier).state = false;
+          final settings = ref.read(settingsControllerProvider);
+          unawaited(
+            desktop.updateTouchNotchBounds(
+              isExpanded: false,
+              style: settings.touchNotchStyle,
+            ),
+          );
+        },
+        onOpenSettings: () {
+          desktop.showMainWindow();
+          context.push('/settings');
+        },
+      );
     }
     final settings = ref.watch(settingsControllerProvider);
     final state = ref.watch(historyControllerProvider);

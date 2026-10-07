@@ -27,7 +27,7 @@ static std::wstring lowercase(std::wstring value) {
   return value;
 }
 
-static bool IsSensitiveWindow(HWND window) {
+bool IsSensitiveWindow(HWND window) {
   if (!window) return false;
   HWND root = GetAncestor(window, GA_ROOT);
   WCHAR title[512] = {};

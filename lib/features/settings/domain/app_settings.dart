@@ -71,6 +71,19 @@ class AppSettings {
       'image',
     },
     this.excludedApplications = const ['1Password', 'Keychain Access'],
+    this.touchNotchEnabled = true,
+    this.touchNotchHoverExpand = true,
+    this.touchNotchAutoCollapse = true,
+    this.touchNotchShowWaveform = true,
+    this.touchNotchShowClipboard = true,
+    this.touchNotchShowMusic = true,
+    this.touchNotchShowTimer = true,
+    this.touchNotchShowCalendar = true,
+    this.touchNotchShowNotes = true,
+    this.touchNotchStyle = 'macbook_notch',
+    this.touchNotchShortcut = '⌥Space',
+    this.touchNotchPomodoroWorkMinutes = 25,
+    this.touchNotchPomodoroBreakMinutes = 5,
   });
 
   final bool hasCompletedOnboarding;
@@ -126,6 +139,19 @@ class AppSettings {
   final DuplicateBehavior duplicateBehavior;
   final Set<String> allowedTypes;
   final List<String> excludedApplications;
+  final bool touchNotchEnabled;
+  final bool touchNotchHoverExpand;
+  final bool touchNotchAutoCollapse;
+  final bool touchNotchShowWaveform;
+  final bool touchNotchShowClipboard;
+  final bool touchNotchShowMusic;
+  final bool touchNotchShowTimer;
+  final bool touchNotchShowCalendar;
+  final bool touchNotchShowNotes;
+  final String touchNotchStyle;
+  final String? touchNotchShortcut;
+  final int touchNotchPomodoroWorkMinutes;
+  final int touchNotchPomodoroBreakMinutes;
 
   AppSettings copyWith({
     bool? hasCompletedOnboarding,
@@ -181,6 +207,19 @@ class AppSettings {
     DuplicateBehavior? duplicateBehavior,
     Set<String>? allowedTypes,
     List<String>? excludedApplications,
+    bool? touchNotchEnabled,
+    bool? touchNotchHoverExpand,
+    bool? touchNotchAutoCollapse,
+    bool? touchNotchShowWaveform,
+    bool? touchNotchShowClipboard,
+    bool? touchNotchShowMusic,
+    bool? touchNotchShowTimer,
+    bool? touchNotchShowCalendar,
+    bool? touchNotchShowNotes,
+    String? touchNotchStyle,
+    String? touchNotchShortcut,
+    int? touchNotchPomodoroWorkMinutes,
+    int? touchNotchPomodoroBreakMinutes,
   }) {
     return AppSettings(
       hasCompletedOnboarding:
@@ -245,6 +284,26 @@ class AppSettings {
       duplicateBehavior: duplicateBehavior ?? this.duplicateBehavior,
       allowedTypes: allowedTypes ?? this.allowedTypes,
       excludedApplications: excludedApplications ?? this.excludedApplications,
+      touchNotchEnabled: touchNotchEnabled ?? this.touchNotchEnabled,
+      touchNotchHoverExpand:
+          touchNotchHoverExpand ?? this.touchNotchHoverExpand,
+      touchNotchAutoCollapse:
+          touchNotchAutoCollapse ?? this.touchNotchAutoCollapse,
+      touchNotchShowWaveform:
+          touchNotchShowWaveform ?? this.touchNotchShowWaveform,
+      touchNotchShowClipboard:
+          touchNotchShowClipboard ?? this.touchNotchShowClipboard,
+      touchNotchShowMusic: touchNotchShowMusic ?? this.touchNotchShowMusic,
+      touchNotchShowTimer: touchNotchShowTimer ?? this.touchNotchShowTimer,
+      touchNotchShowCalendar:
+          touchNotchShowCalendar ?? this.touchNotchShowCalendar,
+      touchNotchShowNotes: touchNotchShowNotes ?? this.touchNotchShowNotes,
+      touchNotchStyle: touchNotchStyle ?? this.touchNotchStyle,
+      touchNotchShortcut: touchNotchShortcut ?? this.touchNotchShortcut,
+      touchNotchPomodoroWorkMinutes:
+          touchNotchPomodoroWorkMinutes ?? this.touchNotchPomodoroWorkMinutes,
+      touchNotchPomodoroBreakMinutes:
+          touchNotchPomodoroBreakMinutes ?? this.touchNotchPomodoroBreakMinutes,
     );
   }
 
@@ -303,6 +362,19 @@ class AppSettings {
     'allowedTypes': allowedTypes.toList(),
     'contentTypesVersion': 2,
     'excludedApplications': excludedApplications,
+    'touchNotchEnabled': touchNotchEnabled,
+    'touchNotchHoverExpand': touchNotchHoverExpand,
+    'touchNotchAutoCollapse': touchNotchAutoCollapse,
+    'touchNotchShowWaveform': touchNotchShowWaveform,
+    'touchNotchShowClipboard': touchNotchShowClipboard,
+    'touchNotchShowMusic': touchNotchShowMusic,
+    'touchNotchShowTimer': touchNotchShowTimer,
+    'touchNotchShowCalendar': touchNotchShowCalendar,
+    'touchNotchShowNotes': touchNotchShowNotes,
+    'touchNotchStyle': touchNotchStyle,
+    'touchNotchShortcut': touchNotchShortcut,
+    'touchNotchPomodoroWorkMinutes': touchNotchPomodoroWorkMinutes,
+    'touchNotchPomodoroBreakMinutes': touchNotchPomodoroBreakMinutes,
   });
 
   factory AppSettings.fromJson(String source) {
@@ -384,6 +456,21 @@ class AppSettings {
       ),
       allowedTypes: allowedTypes,
       excludedApplications: excludedApplications,
+      touchNotchEnabled: value('touchNotchEnabled', true),
+      touchNotchHoverExpand: value('touchNotchHoverExpand', true),
+      touchNotchAutoCollapse: value('touchNotchAutoCollapse', true),
+      touchNotchShowWaveform: value('touchNotchShowWaveform', true),
+      touchNotchShowClipboard: value('touchNotchShowClipboard', true),
+      touchNotchShowMusic: value('touchNotchShowMusic', true),
+      touchNotchShowTimer: value('touchNotchShowTimer', true),
+      touchNotchShowCalendar: value('touchNotchShowCalendar', true),
+      touchNotchShowNotes: value('touchNotchShowNotes', true),
+      touchNotchStyle: value('touchNotchStyle', 'macbook_notch'),
+      touchNotchShortcut: map['touchNotchShortcut'] as String? ?? '⌥Space',
+      touchNotchPomodoroWorkMinutes:
+          value('touchNotchPomodoroWorkMinutes', 25),
+      touchNotchPomodoroBreakMinutes:
+          value('touchNotchPomodoroBreakMinutes', 5),
     );
   }
 }

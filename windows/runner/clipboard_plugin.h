@@ -5,8 +5,11 @@
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include <flutter/encodable_value.h>
+#include <windows.h>
 
 #include <memory>
+
+bool IsSensitiveWindow(HWND window);
 
 class ClipboardPlugin {
  public:

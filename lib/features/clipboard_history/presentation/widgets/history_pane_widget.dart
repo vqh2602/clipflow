@@ -108,6 +108,17 @@ class HistoryPaneWidget extends ConsumerWidget {
                 ),
                 const SizedBox(width: 2),
               ],
+              if (settings.touchNotchEnabled) ...[
+                CupertinoIconControl(
+                  key: const Key('history-notch-button'),
+                  icon: CupertinoIcons.macwindow,
+                  color: const Color(0xFFF56300),
+                  onPressed: () async {
+                    await ref.read(desktopIntegrationProvider).toggleTouchNotch();
+                  },
+                ),
+                const SizedBox(width: 2),
+              ],
               CupertinoIconControl(
                 key: const Key('history-filter-button'),
                 icon: CupertinoIcons.slider_horizontal_3,

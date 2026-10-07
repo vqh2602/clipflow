@@ -59,6 +59,7 @@ final aiDebugControllerProvider =
 
 final quickPanelModeProvider = StateProvider<bool>((ref) => false);
 final aiWindowModeProvider = StateProvider<bool>((ref) => false);
+final touchNotchModeProvider = StateProvider<bool>((ref) => false);
 
 final vaultCryptoProvider = Provider<VaultCrypto>((ref) {
   return VaultCrypto(

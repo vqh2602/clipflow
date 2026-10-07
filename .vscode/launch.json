@@ -8,19 +8,28 @@
         {
             "name": "paste_plus",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "env": {
+                "PATH": "/opt/homebrew/bin:/usr/local/bin:${env:PATH}"
+            }
         },
         {
             "name": "paste_plus (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "env": {
+                "PATH": "/opt/homebrew/bin:/usr/local/bin:${env:PATH}"
+            }
         },
         {
             "name": "paste_plus (release mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "env": {
+                "PATH": "/opt/homebrew/bin:/usr/local/bin:${env:PATH}"
+            }
         }
     ]
 }

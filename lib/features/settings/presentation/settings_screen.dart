@@ -17,10 +17,12 @@ import 'widgets/privacy_settings_section.dart';
 import 'widgets/sharing_settings_section.dart';
 import 'widgets/shortcut_settings_section.dart';
 import 'widgets/storage_settings_section.dart';
+import 'widgets/touch_notch_settings_section.dart';
 
 enum SettingsPage {
   general,
   clipboard,
+  touchNotch,
   sharing,
   privacy,
   storage,
@@ -257,6 +259,7 @@ class _SettingsContent extends StatelessWidget {
     final content = switch (page) {
       SettingsPage.general => const GeneralSettingsSection(),
       SettingsPage.clipboard => const ClipboardSettingsSection(),
+      SettingsPage.touchNotch => const TouchNotchSettingsSection(),
       SettingsPage.sharing => const SharingSettingsSection(),
       SettingsPage.privacy => const PrivacySettingsSection(),
       SettingsPage.storage => const StorageSettingsSection(),
@@ -292,6 +295,7 @@ class _SettingsContent extends StatelessWidget {
 String _label(BuildContext context, SettingsPage page) => switch (page) {
   SettingsPage.general => context.l10n.tab_general,
   SettingsPage.clipboard => context.l10n.tab_clipboard,
+  SettingsPage.touchNotch => 'Touch Note (Tai thỏ)',
   SettingsPage.sharing => context.l10n.tab_sharing_devices,
   SettingsPage.privacy => context.l10n.tab_privacy,
   SettingsPage.storage => context.l10n.tab_storage,
@@ -303,6 +307,7 @@ String _label(BuildContext context, SettingsPage page) => switch (page) {
 IconData _icon(SettingsPage page) => switch (page) {
   SettingsPage.general => CupertinoIcons.settings,
   SettingsPage.clipboard => CupertinoIcons.doc_on_clipboard,
+  SettingsPage.touchNotch => CupertinoIcons.macwindow,
   SettingsPage.sharing => CupertinoIcons.antenna_radiowaves_left_right,
   SettingsPage.privacy => CupertinoIcons.hand_raised,
   SettingsPage.storage => CupertinoIcons.archivebox,

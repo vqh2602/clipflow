@@ -26,6 +26,7 @@ GoRouter createRouter({required bool hasCompletedOnboarding}) {
             'storage' => SettingsPage.storage,
             'shortcuts' => SettingsPage.shortcuts,
             'ai' => SettingsPage.ai,
+            'touchNotch' => SettingsPage.touchNotch,
             _ => null,
           };
           return CustomTransitionPage<void>(

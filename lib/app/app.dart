@@ -11,6 +11,7 @@ import '../core/services/update_download_provider.dart';
 import '../core/ui/ai_debug_overlay.dart';
 import '../features/clipboard_history/domain/clipboard_item.dart';
 import '../features/clipboard_history/presentation/history_controller.dart';
+import '../features/touch_notch/data/touch_notch_providers.dart';
 import 'providers.dart';
 import 'router.dart';
 import 'theme/app_theme.dart';
@@ -59,6 +60,7 @@ class _ClipFlowAppState extends ConsumerState<ClipFlowApp>
               router.go('/');
               ref.read(aiWindowModeProvider.notifier).state = false;
               ref.read(quickPanelModeProvider.notifier).state = false;
+              ref.read(touchNotchModeProvider.notifier).state = false;
             },
             onQuickPanelDismissed: () {
               ref.read(quickPanelModeProvider.notifier).state = false;
@@ -66,7 +68,27 @@ class _ClipFlowAppState extends ConsumerState<ClipFlowApp>
             onAiWindowRequested: () {
               router.go('/');
               ref.read(quickPanelModeProvider.notifier).state = false;
+              ref.read(touchNotchModeProvider.notifier).state = false;
               ref.read(aiWindowModeProvider.notifier).state = true;
+            },
+            onTouchNotchRequested: () {
+              router.go('/');
+              ref.read(quickPanelModeProvider.notifier).state = false;
+              ref.read(aiWindowModeProvider.notifier).state = false;
+              ref.read(touchNotchModeProvider.notifier).state = true;
+            },
+            onTouchNotchDismissed: () {
+              ref.read(touchNotchModeProvider.notifier).state = false;
+            },
+            onTouchNotchCollapseRequested: () {
+              ref.read(touchNotchExpandedProvider.notifier).state = false;
+              final settings = ref.read(settingsControllerProvider);
+              unawaited(
+                ref.read(desktopIntegrationProvider).updateTouchNotchBounds(
+                      isExpanded: false,
+                      style: settings.touchNotchStyle,
+                    ),
+              );
             },
             onCheckUpdatesRequested: () {
               router.go('/settings?page=about');
@@ -74,6 +96,8 @@ class _ClipFlowAppState extends ConsumerState<ClipFlowApp>
               updates.reset();
               unawaited(updates.checkOnly());
             },
+            shouldProtectSensitiveWindows: () =>
+                ref.read(settingsControllerProvider).protectSensitiveWindows,
             onTrayStatusChanged: (enabled) {
               unawaited(
                 ref
@@ -96,6 +120,13 @@ class _ClipFlowAppState extends ConsumerState<ClipFlowApp>
             .read(desktopIntegrationProvider)
             .setCaptureProtection(settings.hideDuringScreenSharing),
       );
+      if (Platform.isMacOS && settings.touchNotchEnabled && settings.runInTray) {
+        unawaited(
+          ref.read(desktopIntegrationProvider).showTouchNotch(
+                style: settings.touchNotchStyle,
+              ),
+        );
+      }
     });
   }
 
@@ -111,8 +142,24 @@ class _ClipFlowAppState extends ConsumerState<ClipFlowApp>
 
   @override
   void onWindowClose() async {
+    final settings = ref.read(settingsControllerProvider);
+    final desktop = ref.read(desktopIntegrationProvider);
+    if (desktop.windowMode == DesktopWindowMode.touchNotch) {
+      ref.read(touchNotchExpandedProvider.notifier).state = false;
+      await desktop.updateTouchNotchBounds(
+        isExpanded: false,
+        style: settings.touchNotchStyle,
+      );
+      return;
+    }
+    if (Platform.isMacOS && settings.touchNotchEnabled) {
+      await desktop.showTouchNotch(
+        style: settings.touchNotchStyle,
+      );
+      return;
+    }
     if (await windowManager.isPreventClose()) {
-      await ref.read(desktopIntegrationProvider).handleWindowClose();
+      await desktop.handleWindowClose();
     }
   }
 

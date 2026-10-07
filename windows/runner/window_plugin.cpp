@@ -1,4 +1,5 @@
 #include "window_plugin.h"
+#include "clipboard_plugin.h"
 
 #include <windows.h>
 #include <shobjidl.h> // for IFileDialog
@@ -125,6 +126,9 @@ void WindowPlugin::HandleMethodCall(
     const BOOL applied = SetWindowDisplayAffinity(
         window_handle_, enabled ? kExcludeFromCapture : WDA_NONE);
     result->Success(flutter::EncodableValue(applied != FALSE));
+  } else if (method_call.method_name().compare("isSensitiveContext") == 0) {
+    result->Success(flutter::EncodableValue(
+        IsSensitiveWindow(GetForegroundWindow())));
   } else if (method_call.method_name().compare("getRunningApplications") == 0) {
     flutter::EncodableList list;
     EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&list));

@@ -2,9 +2,11 @@ import Cocoa
 import FlutterMacOS
 import ServiceManagement
 import Accessibility
+import Carbon
 import Vision
 
 class MainFlutterWindow: NSWindow {
+  private var standardStyleMask: NSWindow.StyleMask = []
   private var standardCollectionBehavior: NSWindow.CollectionBehavior = []
   private var standardBackgroundColor: NSColor = .windowBackgroundColor
   private var standardIsOpaque = true
@@ -13,6 +15,42 @@ class MainFlutterWindow: NSWindow {
   private var standardSharingType: NSWindow.SharingType = .readOnly
   private var previousApplication: NSRunningApplication?
   private var lastActiveApplication: NSRunningApplication?
+  private var isTouchNotchMode = false
+
+  override var canBecomeKey: Bool {
+    return true
+  }
+
+  override var canBecomeMain: Bool {
+    return true
+  }
+
+  override func constrainFrameRect(_ frameRect: NSRect, to screen: NSScreen?) -> NSRect {
+    if self.isTouchNotchMode {
+      return frameRect
+    }
+    return super.constrainFrameRect(frameRect, to: screen)
+  }
+
+  private func getNotchScreen() -> NSScreen {
+    if #available(macOS 12.0, *) {
+      for s in NSScreen.screens {
+        if s.safeAreaInsets.top > 0 {
+          return s
+        }
+      }
+    }
+    return NSScreen.screens.first ?? NSScreen.main ?? NSScreen()
+  }
+
+  func positionAtNotch(width: CGFloat, height: CGFloat, topOffset: CGFloat) {
+    let screen = self.getNotchScreen()
+    let screenFrame = screen.frame
+    let x = screenFrame.origin.x + (screenFrame.width - width) / 2.0
+    let y = screenFrame.origin.y + screenFrame.height - topOffset - height
+    let targetFrame = NSRect(x: x, y: y, width: width, height: height)
+    self.setFrame(targetFrame, display: true, animate: false)
+  }
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -20,6 +58,7 @@ class MainFlutterWindow: NSWindow {
     let windowFrame = self.frame
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
+    standardStyleMask = self.styleMask
     standardCollectionBehavior = self.collectionBehavior
     standardBackgroundColor = self.backgroundColor
     standardIsOpaque = self.isOpaque
@@ -278,6 +317,93 @@ class MainFlutterWindow: NSWindow {
           self.collectionBehavior = self.standardCollectionBehavior
         }
         result(nil)
+      case "setTouchNotchMode":
+        var enabled = false
+        var width: CGFloat = 260
+        var height: CGFloat = 36
+        var isDynamicIsland = false
+
+        if let boolVal = call.arguments as? Bool {
+          enabled = boolVal
+        } else if let dict = call.arguments as? [String: Any] {
+          enabled = dict["enabled"] as? Bool ?? false
+          width = CGFloat((dict["width"] as? NSNumber)?.doubleValue ?? 260)
+          height = CGFloat((dict["height"] as? NSNumber)?.doubleValue ?? 36)
+          isDynamicIsland = dict["isDynamicIsland"] as? Bool ?? false
+        }
+
+        self.isTouchNotchMode = enabled
+        if enabled {
+          if
+            let frontmostApplication = NSWorkspace.shared.frontmostApplication,
+            frontmostApplication.processIdentifier != ProcessInfo.processInfo.processIdentifier
+          {
+            self.previousApplication = frontmostApplication
+            self.lastActiveApplication = frontmostApplication
+          }
+          flutterViewController.backgroundColor = .clear
+          self.styleMask = [.borderless]
+          self.isOpaque = false
+          self.backgroundColor = .clear
+          self.hasShadow = false
+          self.isMovable = false
+          self.level = .statusBar
+          self.hidesOnDeactivate = false
+          self.collectionBehavior = [
+            .canJoinAllSpaces,
+            .fullScreenAuxiliary,
+            .stationary,
+            .ignoresCycle,
+          ]
+
+          let topOffset: CGFloat = isDynamicIsland ? 8.0 : 0.0
+          self.positionAtNotch(width: width, height: height, topOffset: topOffset)
+        } else {
+          flutterViewController.backgroundColor = .windowBackgroundColor
+          self.styleMask = self.standardStyleMask
+          self.isOpaque = self.standardIsOpaque
+          self.backgroundColor = self.standardBackgroundColor
+          self.hasShadow = self.standardHasShadow
+          self.isMovable = self.standardIsMovable
+          self.level = .normal
+          self.hidesOnDeactivate = false
+          self.collectionBehavior = self.standardCollectionBehavior
+        }
+        result(nil)
+      case "updateNotchBounds":
+        guard let args = call.arguments as? [String: Any],
+              let width = (args["width"] as? NSNumber)?.doubleValue,
+              let height = (args["height"] as? NSNumber)?.doubleValue
+        else {
+          result(nil)
+          return
+        }
+        let isDynamicIsland = args["isDynamicIsland"] as? Bool ?? false
+        let topOffset: CGFloat = isDynamicIsland ? 8.0 : 0.0
+        self.positionAtNotch(width: CGFloat(width), height: CGFloat(height), topOffset: topOffset)
+        result(nil)
+      case "getNotchInfo":
+        let mouseLoc = NSEvent.mouseLocation
+        let targetScreen = NSScreen.screens.first(where: { NSMouseInRect(mouseLoc, $0.frame, false) }) ?? NSScreen.main ?? NSScreen.screens.first
+        var topInset: CGFloat = 0
+        var width: CGFloat = 1728
+        var height: CGFloat = 1117
+        var x: CGFloat = 0
+        if let s = targetScreen {
+          width = s.frame.width
+          height = s.frame.height
+          x = s.frame.origin.x
+          if #available(macOS 12.0, *) {
+            topInset = s.safeAreaInsets.top
+          }
+        }
+        result([
+          "x": Double(x),
+          "width": Double(width),
+          "height": Double(height),
+          "topInset": Double(topInset),
+          "hasNotch": topInset > 0,
+        ])
       case "setShowInDock":
         guard let show = call.arguments as? Bool else {
           result(
@@ -307,6 +433,12 @@ class MainFlutterWindow: NSWindow {
         }
         self.sharingType = enabled ? .none : self.standardSharingType
         result(nil)
+      case "isSensitiveContext":
+        guard let application = NSWorkspace.shared.frontmostApplication else {
+          result(false)
+          return
+        }
+        result(Self.isSensitiveContext(application))
       case "checkAccessibilityPermission":
         result(AXIsProcessTrusted())
       case "requestAccessibilityPermission":
@@ -365,6 +497,13 @@ class MainFlutterWindow: NSWindow {
           }
         }
         result(nil)
+      case "mediaControl":
+        guard let action = call.arguments as? String else {
+          result(nil)
+          return
+        }
+        self.handleMediaControl(action: action)
+        result(true)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -384,6 +523,12 @@ class MainFlutterWindow: NSWindow {
   }
 
   private static func isSensitiveContext(_ application: NSRunningApplication) -> Bool {
+    // Browsers enable Secure Event Input while a password control is focused.
+    // Check it before Accessibility so protection still works when AX access
+    // has not been granted yet.
+    if IsSecureEventInputEnabled() {
+      return true
+    }
     guard AXIsProcessTrusted() else { return false }
     let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
 
@@ -601,6 +746,26 @@ class MainFlutterWindow: NSWindow {
       return "notFound"
     @unknown default:
       return "unknown"
+    }
+  }
+
+  private func handleMediaControl(action: String) {
+    let script: String
+    switch action {
+    case "play":
+      script = "tell application \"Spotify\" to play"
+    case "pause":
+      script = "tell application \"Spotify\" to pause"
+    case "next":
+      script = "tell application \"Spotify\" to next track"
+    case "previous":
+      script = "tell application \"Spotify\" to previous track"
+    default:
+      return
+    }
+    if let scriptObject = NSAppleScript(source: script) {
+      var errorDict: NSDictionary?
+      scriptObject.executeAndReturnError(&errorDict)
     }
   }
 }
